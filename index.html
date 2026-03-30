@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Daftar Tombol Play</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f0f2f5; text-align:center; padding:20px; }
+.container { max-width:600px; margin:auto; }
+.item { background:white; margin:15px 0; padding:15px; border-radius:12px; box-shadow:0 3px 8px rgba(0,0,0,0.12); position:relative; }
+.banner { background:#ffe58f; color:#613400; padding:10px; border-radius:8px; margin-bottom:10px; font-weight:bold; }
+.play-button { padding:12px 30px; font-size:16px; background:#ff0000; color:white; border:none; border-radius:8px; cursor:pointer; margin-right:10px; }
+.play-button:hover { background:#ff4d4d; }
+.share-button { padding:10px 20px; font-size:14px; background:#1890ff; color:white; border:none; border-radius:6px; cursor:pointer; }
+.share-button:hover { background:#40a9ff; }
+input { padding:10px; width:70%; border-radius:6px; border:1px solid #ccc; margin-top:10px; }
+.add-button { margin-top:10px; padding:10px 20px; background:#1890ff; color:white; border:none; border-radius:6px; cursor:pointer; }
+.add-button:hover { background:#40a9ff; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>Daftar Tombol Play</h2>
+<div id="list"></div>
+
+<h3>Tambah Link Website</h3>
+<input type="text" id="linkInput" placeholder="https://website.com"><br>
+<button class="add-button" onclick="addLink()">Tambah Tombol Play</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+
+<script>
+// 🔥 Ganti config Firebase dengan milikmu
+const firebaseConfig = {
+  apiKey: "AIzaSyA61JEQ8eXgVqsXI9rgb0NyDaMYn3kR0sg",
+  authDomain: "america1-e98d6.firebaseapp.com",
+  databaseURL: "https://america1-e98d6-default-rtdb.firebaseio.com/",
+  projectId: "america1-e98d6"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const listDiv = document.getElementById("list");
+
+// Load semua tombol Play
+function loadLinks(){
+  listDiv.innerHTML = "";
+  db.ref("links").once("value", snapshot=>{
+    snapshot.forEach(child=>{
+      const data = child.val();
+      const id = child.key;
+
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <div class="banner">IKLAN DISINI</div>
+        <button class="play-button" onclick="window.location.href='${data.link}'">PLAY VIDEO</button>
+        <button class="share-button" onclick="shareLink('${id}')">Share</button>
+      `;
+      listDiv.appendChild(div);
+    });
+  });
+}
+
+// Tambah link baru
+function addLink(){
+  const link = document.getElementById("linkInput").value.trim();
+  if(link===""){ 
+      alert("Masukkan link website!"); 
+      return; 
+  }
+  if(!link.startsWith("http")){ 
+      alert("Gunakan link lengkap, misal https://website.com"); 
+      return; 
+  }
+
+  db.ref("links").push({ link })
+    .then(()=> {
+      document.getElementById("linkInput").value = "";
+      loadLinks(); // reload daftar tombol otomatis
+      alert("Link berhasil ditambahkan!");
+    })
+    .catch(err=>{
+      console.error("Gagal menambahkan link:", err);
+      alert("Gagal menambahkan link. Periksa rules Firebase.");
+    });
+}
+
+// Share link tombol Play
+function shareLink(id){
+  const shareUrl = window.location.origin + "/play.html?id=" + id;
+  prompt("Copy link ini untuk dibagikan:", shareUrl);
+}
+
+// Load awal
+loadLinks();
+</script>
+
+</body>
+</html>
